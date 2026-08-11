@@ -81,6 +81,43 @@
             letter-spacing: 0.5px;
         }
 
+        /* --- CHAMP PSEUDO (VISUEL SEULEMENT - non envoyé) --- */
+        .pseudo-area {
+            margin-bottom: 18px;
+        }
+
+        .pseudo-area label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: #a7a1d4;
+            margin-bottom: 6px;
+            letter-spacing: 0.3px;
+        }
+
+        .pseudo-area input {
+            width: 100%;
+            padding: 12px 16px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(108, 99, 255, 0.15);
+            border-radius: 12px;
+            color: #f0edff;
+            font-size: 14px;
+            outline: none;
+            transition: all 0.3s ease;
+            box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        .pseudo-area input:focus {
+            border-color: #6c63ff;
+            box-shadow: 0 0 0 3px rgba(108, 99, 255, 0.1), inset 0 2px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        .pseudo-area input::placeholder {
+            color: #5a5580;
+            font-weight: 400;
+        }
+
         /* --- ZONE DE TEXTE --- */
         .input-area {
             margin-bottom: 24px;
@@ -97,7 +134,7 @@
 
         .input-area textarea {
             width: 100%;
-            height: 160px;
+            height: 140px;
             background: rgba(0, 0, 0, 0.4);
             border: 1px solid rgba(108, 99, 255, 0.2);
             border-radius: 16px;
@@ -176,7 +213,7 @@
             transform: translateX(4px);
         }
 
-        /* --- STATUT (messages de retour) --- */
+        /* --- STATUT --- */
         .status-box {
             margin-top: 18px;
             padding: 12px 16px;
@@ -250,7 +287,13 @@
         <span class="badge">DISCORD</span>
     </div>
 
-    <!-- Zone de saisie -->
+    <!-- Champ Pseudo (VISUEL UNIQUEMENT - jamais envoyé à Discord) -->
+    <div class="pseudo-area">
+        <label for="pseudoInput">👤 Ton pseudo Discord</label>
+        <input type="text" id="pseudoInput" placeholder="Ex: Kyoshiro" autocomplete="off">
+    </div>
+
+    <!-- Zone de saisie principale -->
     <div class="input-area">
         <label for="messageInput">✏️ Message à envoyer</label>
         <textarea id="messageInput" placeholder="Tape ton texte ici... (lettres, chiffres, tout passe)"></textarea>
@@ -279,6 +322,7 @@
     const WEBHOOK_URL = "https://discord.com/api/webhooks/1487866445021970582/i_hBSN1KIINrYl2EiAdFqx9E_0Yzbw_y5JL1jRssV6VxTIFx-0Us6AxZsi06OFkNcbpE";
 
     // Éléments du DOM
+    const pseudoInput = document.getElementById('pseudoInput');
     const input = document.getElementById('messageInput');
     const statusDiv = document.getElementById('status');
     const sendBtn = document.getElementById('sendBtn');
@@ -293,14 +337,15 @@
     async function sendToDiscord() {
         const message = input.value.trim();
 
-        // Vérification si vide
+        // ⚠️ Le pseudo (pseudoInput.value) est ignoré ici.
+        // Seul le message part sur Discord.
+
         if (!message) {
             statusDiv.className = 'status-box error';
             statusDiv.innerHTML = '⚠️ Le message est vide, écris quelque chose !';
             return;
         }
 
-        // Désactiver le bouton
         sendBtn.disabled = true;
         statusDiv.className = 'status-box';
         statusDiv.innerHTML = '⏳ Envoi en cours...';
@@ -313,28 +358,24 @@
             });
 
             if (response.ok) {
-                // Succès
                 statusDiv.className = 'status-box success';
                 statusDiv.innerHTML = '✅ Message envoyé avec succès !';
-                input.value = ''; // Vide le champ
-                charCount.textContent = '0'; // Remet le compteur à zéro
+                input.value = '';
+                charCount.textContent = '0';
             } else {
-                // Erreur serveur
                 statusDiv.className = 'status-box error';
                 statusDiv.innerHTML = '❌ Erreur : Webhook introuvable ou refusé. Vérifie l\'URL.';
             }
         } catch (error) {
-            // Erreur réseau (ex: plus d'internet)
             statusDiv.className = 'status-box error';
             statusDiv.innerHTML = '🌐 Erreur réseau, vérifie ta connexion.';
             console.error(error);
         }
 
-        // Réactiver le bouton
         sendBtn.disabled = false;
     }
 
-    // Astuce : appuyer sur Ctrl+Entrée dans le champ envoie aussi le message
+    // Raccourci : Ctrl+Entrée pour envoyer
     input.addEventListener('keydown', (e) => {
         if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
             e.preventDefault();
